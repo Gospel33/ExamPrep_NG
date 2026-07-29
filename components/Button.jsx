@@ -3,8 +3,8 @@ import { StyleSheet, Text, TouchableOpacity } from "react-native";
 function Button({
   title,
   onPress,
-  backgroundColor = "#2F6FED",
-  textColor = "#fff",
+  backgroundColor = "#666666",
+  textColor = "#E5E5E5",
 }) {
   return (
     <TouchableOpacity
@@ -21,7 +21,7 @@ export default Button;
 const styles = StyleSheet.create({
   button: {
     paddingHorizontal: 24,
-    paddingVertical: 16,
+    paddingVertical: 8,
     borderRadius: 8,
     marginVertical: 5,
     width: "100%",
@@ -31,6 +31,6 @@ const styles = StyleSheet.create({
   buttonText: {
     color: "#fff",
     fontSize: 16,
-    fontWeight: "bold",
+    fontWeight: 400,
   },
 });

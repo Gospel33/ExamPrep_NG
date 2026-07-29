@@ -1,10 +1,10 @@
-import { View, TextInput, StyleSheet, Text, Pressable } from "react-native";
+import { View, TextInput, StyleSheet, Pressable } from "react-native";
 import { useState } from "react";
 
 import Entypo from "@expo/vector-icons/Entypo";
 
+
 function InputField({
-  label,
   icon,
   iconName,
   value,
@@ -17,20 +17,22 @@ function InputField({
 
   return (
     <View style={styles.inputContainer}>
-      <Text style={styles.label}>{label}</Text>
       <View style={styles.fieldContainer}>
-        <View>
-          <TextInput
-            style={styles.input}
-            value={value}
-            onChangeText={onChangeText}
-            placeholder={placeholder}
-            secureTextEntry={visible ? secureTextEntry : false}
-            keyboardType={keyboardType}
-          />
+        <View style={{flexDirection: "row", gap: 4, alignItems: "center"}}>
+          <View style={{marginLeft: 8}}>{icon}</View>
+          <View>
+            <TextInput
+              style={styles.input}
+              value={value}
+              onChangeText={onChangeText}
+              placeholder={placeholder}
+              secureTextEntry={visible ? secureTextEntry : false}
+              keyboardType={keyboardType}
+            />
+          </View>
         </View>
 
-        <View style={{marginRight: 6}}>
+        <View style={{ marginRight: 6 }}>
           {iconName === "password" || iconName === "confirm-password" ? (
             <Pressable onPress={() => setVisible(!visible)}>
               {visible ? (
@@ -59,7 +61,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     borderWidth: 1,
     borderColor: "#76849F",
-    borderRadius: 5
+    borderRadius: 5,
   },
   label: {
     fontFamily: "Poppins",
