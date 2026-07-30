@@ -3,7 +3,7 @@ import { router } from "expo-router";
 
 import Ionicons from "@expo/vector-icons/Ionicons";
 
-function Header({ title, subTitle }) {
+function Header({ title, subTitle, showAvatar = false, icon }) {
   return (
     <View style={styles.headerContainer}>
       <View>
@@ -20,8 +20,8 @@ function Header({ title, subTitle }) {
           />
         </Pressable>
       </View>
-      <View style={styles.avatar} />
-      <View style={styles.titleContainer}>
+      {showAvatar ? <View style={styles.avatar} /> : <View style={{alignSelf: "center", top: 72}}>{icon}</View> }
+      <View style={[styles.titleContainer, showAvatar ? {top: 44} : {top: 86}]}>
         <Text style={styles.caption}>{title}</Text>
         <Text style={styles.subCaption}>{subTitle}</Text>
       </View>
@@ -34,14 +34,6 @@ export default Header;
 const styles = StyleSheet.create({
   headerContainer: {
     flexDirection: "column"
-  },
-
-  icon: {
-    width: 44,
-    height: 44,
-    borderRadius: 12,
-    paddingVertical: 10,
-    gap: 10,
   },
 
   avatar: {
@@ -75,5 +67,6 @@ const styles = StyleSheet.create({
     fontStyle: "normal",
     fontSize: 14,
     color: "#666666",
+    textAlign: "center"
   },
 });

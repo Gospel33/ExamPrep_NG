@@ -1,4 +1,11 @@
-import { StyleSheet, Text, View, Platform, StatusBar } from "react-native";
+import {
+  StyleSheet,
+  Text,
+  View,
+  Platform,
+  StatusBar,
+  Pressable,
+} from "react-native";
 import InputField from "../../components/InputField";
 import Button from "../../components/Button";
 import Header from "../../components/Header";
@@ -9,15 +16,13 @@ import FontAwesome from "@expo/vector-icons/FontAwesome";
 import OutlineButton from "../../components/OutlineButton";
 import Line from "../../components/Line";
 import { useState } from "react";
+import { router } from "expo-router";
 
 function SignUp() {
-
   const [isChecked, setIsChecked] = useState(false);
   return (
     <View style={styles.container}>
-      <Header title={"Create Account"} subTitle={"Let's get you started"} />
-
-      {/* <View style={styles.line} /> */}
+      <Header title={"Create Account"} subTitle={"Let's get you started"} showAvatar={true}/>
 
       <View style={styles.fieldsContainer}>
         <InputField
@@ -44,8 +49,9 @@ function SignUp() {
       </View>
       <View style={styles.termsContainer}>
         <Checkbox
-          size={16}
+          size={12}
           color="#D9D9D9"
+          style={{ borderRadius: 5 }}
           value={isChecked}
           onValueChange={() => setIsChecked(!isChecked)}
         />
@@ -57,7 +63,7 @@ function SignUp() {
             color: "#666666",
           }}
         >
-          I agree to the 
+          I agree to the
           <Text
             style={{
               fontFamily: "Inter",
@@ -65,7 +71,7 @@ function SignUp() {
               fontWeight: 500,
               color: "#666666",
               lineHeight: 20,
-              textDecorationLine: "underline"
+              textDecorationLine: "underline",
             }}
           >
             Terms & Condition
@@ -73,13 +79,25 @@ function SignUp() {
         </Text>
       </View>
       <View style={styles.action}>
-        <Button title={"Sign Up"} />
-        <Line caption={"or continue with"} />
-        <OutlineButton title={"Continue with Google"} icon={<Entypo name="user" size={18} color="black" />}/>
-        <View>
+        <Button title={"Sign Up"} onPress={() => {
+          router.push("./auth/verify-email")
+        }}/>
+        <Line caption={"or "} width="53%"/>
+        <OutlineButton
+          title={"Continue with Google"}
+          icon={<Entypo name="user" size={18} color="black" />}
+        />
+        <View style={{flexDirection: "row", alignItems: "center", justifyContent: "center"}}>
           <Text style={styles.accountAction}>
-            Already have an account? Log in
+            Already have an account? {" "}
           </Text>
+          <Pressable
+              onPress={() => {
+                router.push("/auth/login");
+              }}
+            >
+              <Text style={[styles.accountAction, {textDecorationLine: "underline"}]}>Log in</Text>
+            </Pressable>
         </View>
       </View>
     </View>
@@ -105,15 +123,6 @@ const styles = StyleSheet.create({
     }),
   },
 
-  // line: {
-  //   width: "90%",
-  //   top: 28,
-  //   borderWidth: 1,
-  //   borderColor: "#f2eaea",
-  //   alignSelf: "center",
-  //   justifyContent: "center",
-  // },
-
   fieldsContainer: {
     top: 42,
     gap: 12,
@@ -133,6 +142,7 @@ const styles = StyleSheet.create({
     fontFamily: "Poppins",
     fontSize: 12,
     fontWeight: 400,
+    alignItems: "center",
   },
 
   termsContainer: {

@@ -9,55 +9,113 @@ import {
 import InputField from "../../components/InputField";
 import Button from "../../components/Button";
 import Header from "../../components/Header";
-// import { Checkbox } from "expo-checkbox";
+import { Checkbox } from "expo-checkbox";
+import { useState } from "react";
 
-// import Entypo from "@expo/vector-icons/Entypo";
-import EvilIcons from "@expo/vector-icons/EvilIcons";
-// import FontAwesome5 from "@expo/vector-icons/FontAwesome5";
-import Fontisto from "@expo/vector-icons/Fontisto";
+import FontAwesome from "@expo/vector-icons/FontAwesome";
+import Entypo from "@expo/vector-icons/Entypo";
 import OutlineButton from "../../components/OutlineButton";
 import Line from "../../components/Line";
+import { router } from "expo-router";
 
 function Login() {
+  const [isChecked, setIsChecked] = useState(false);
+
   return (
     <View style={styles.container}>
-      <Header title={"Welcome Back"} subTitle={"Login to Continue"} />
+      <Header
+        title={"Welcome Back"}
+        subTitle={"Login to Continue"}
+        showAvatar={true}
+      />
 
       <View style={styles.fieldsContainer}>
         <InputField
-          icon={<Fontisto name="email" size={18} color="#4f5351" />}
+          icon={<Entypo name="mail" size={18} color="black" />}
           placeholder={"Email Address"}
         />
 
         <InputField
-          icon={<EvilIcons name="lock" size={22} color="#4f5351" />}
+          icon={<FontAwesome name="lock" size={18} color="black" />}
           placeholder={"*************"}
           iconName={"password"}
           secureTextEntry={true}
         />
       </View>
 
-      <View>
-        <View>
-          <Text>Remember Me</Text>
+      <View
+        style={{
+          marginTop: 56,
+          flexDirection: "row",
+          marginHorizontal: 18,
+          justifyContent: "space-between",
+          alignItems: "center",
+        }}
+      >
+        <View style={styles.termsContainer}>
+          <Checkbox
+            size={12}
+            color="#D9D9D9"
+            style={{ borderRadius: 5 }}
+            value={isChecked}
+            onValueChange={() => setIsChecked(!isChecked)}
+          />
+          <Text
+            style={{
+              fontFamily: "Inter",
+              size: 12,
+              fontWeight: 500,
+              color: "#666666",
+            }}
+          >
+            Remember Me
+          </Text>
         </View>
 
         <View>
           <Pressable>
-            <Text>forgot password</Text>
+            <Text
+              style={{
+                fontSize: 12,
+                textDecorationLine: "underline",
+                fontWeight: 400,
+                fontFamily: "Poppins",
+              }}
+            >
+              forgot password
+            </Text>
           </Pressable>
         </View>
       </View>
 
       <View style={styles.action}>
         <Button title={"Login"} />
-        <Line caption={"or continue with"} />
+        <Line caption={"or"} width={"53%"} />
 
         <OutlineButton title={"Continue with Google"} />
-        <View>
-          <Text style={styles.accountAction}>
-            Already have an account? Log in
-          </Text>
+        <View
+          style={{
+            flexDirection: "row",
+            alignItems: "center",
+            justifyContent: "center",
+          }}
+        >
+          <Text style={styles.accountAction}>Don{`'`}t have an account? </Text>
+          <Pressable
+            style={{ alignItems: "center" }}
+            onPress={() => {
+              router.push("./auth/sign-up");
+            }}
+          >
+            <Text
+              style={[
+                styles.accountAction,
+                { textDecorationLine: "underline" },
+              ]}
+            >
+              Sign Up
+            </Text>
+          </Pressable>
         </View>
       </View>
     </View>
@@ -90,7 +148,7 @@ const styles = StyleSheet.create({
   },
 
   action: {
-    top: 56,
+    top: 28,
     marginHorizontal: 18,
     flexDirection: "column",
     gap: 8,
@@ -108,6 +166,5 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     gap: 8,
-    marginBottom: 72,
   },
 });
