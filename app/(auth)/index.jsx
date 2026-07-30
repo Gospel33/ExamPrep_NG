@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { StyleSheet, Text, View, TextInput, TouchableOpacity, SafeAreaView, ScrollView, Image, Dimensions } from 'react-native';
+import { StyleSheet, Text, View, TextInput, TouchableOpacity, SafeAreaView, ScrollView, Image, Dimensions, StatusBar } from 'react-native';
 import { router, Link } from 'expo-router';
 import Feather from '@expo/vector-icons/Feather';
 
@@ -14,6 +14,7 @@ export default function SignInScreen() {
 
   return (
     <SafeAreaView style={styles.mainContainer}>
+      <StatusBar barStyle="dark-content" backgroundColor="#FFF" />
       <ScrollView contentContainerStyle={styles.scrollContainer} showsVerticalScrollIndicator={false}>
         
         {/* TOP HERO ILLUSTRATION SECTION */}

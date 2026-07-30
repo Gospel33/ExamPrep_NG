@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
-import { StyleSheet, Text, View, TouchableOpacity, SafeAreaView, ScrollView, Image, Dimensions, Alert } from 'react-native';
+import { StyleSheet, Text, View, TouchableOpacity, SafeAreaView, ScrollView, Image, Dimensions, Alert, StatusBar } from 'react-native';
 import { router, useLocalSearchParams } from 'expo-router';
 
 const { width } = Dimensions.get('window');
 const authIllustration = require("../../assets/images/auth_illustration.png");
-const logoIllustration = require("../../assets/images/examPrep_logo.png")
+const logoIllustration = require("../../assets/images/examPrep_logo.png");
 
 const AVAILABLE_SUBJECTS = [
   'English', 'Biology', 'Physics', 'Chemistry', 'Literature', 
@@ -37,7 +37,6 @@ export default function SignUp2Screen() {
       return Alert.alert('Terms & Conditions', 'You must agree to the Terms & Conditions to create an account.');
     }
 
-    // PENDING: Complete user profile ready for your API!
     console.log("--- FINAL SUBMIT: ACCOUNT REGISTRATION READY ---");
     console.log({
       action: "register_new_student_account",
@@ -49,12 +48,12 @@ export default function SignUp2Screen() {
     });
     console.log("-------------------------------------------------");
 
-    // Account setup completely finished -> Route user into the application home dashboard!
     router.replace('/(app)/home');
   };
 
   return (
     <SafeAreaView style={styles.mainContainer}>
+      <StatusBar barStyle="dark-content" backgroundColor="#FFF" />
       <ScrollView contentContainerStyle={styles.scrollContainer} showsVerticalScrollIndicator={false}>
         <View style={styles.illustrationFrame}>
           <Image source={logoIllustration} style={styles.logoImage} resizeMode="contain" />
@@ -78,6 +77,13 @@ export default function SignUp2Screen() {
                   <Text style={[styles.subjectChipText, isSelected && styles.subjectChipTextActive]}>
                     {subject}
                   </Text>
+                  
+                  {/* Cancel Icon: Renders only when the subject is selected */}
+                  {isSelected && (
+                    <View style={styles.closeIconWrapper}>
+                      <Text style={styles.closeIconText}>×</Text>
+                    </View>
+                  )}
                 </TouchableOpacity>
               );
             })}
@@ -111,10 +117,40 @@ const styles = StyleSheet.create({
   screenTitleText: { fontSize: 24, fontWeight: 'bold', color: '#111827' },
   screenSubtitleText: { fontSize: 13, color: '#6B7280', marginTop: 4, marginBottom: 16 },
   subjectsGridWrapper: { flexDirection: 'row', flexWrap: 'wrap', gap: 10, width: '100%', marginBottom: 24 },
-  subjectChip: { paddingHorizontal: 16, paddingVertical: 10, borderRadius: 24, borderWidth: 1, borderColor: '#E5E7EB', backgroundColor: '#FFFFFF' },
+  
+  // UPDATED STYLES FOR THE CHIPS
+  subjectChip: { 
+    flexDirection: 'row',       
+    alignItems: 'center',       
+    paddingHorizontal: 16, 
+    paddingVertical: 10, 
+    borderRadius: 24, 
+    borderWidth: 1, 
+    borderColor: '#E5E7EB', 
+    backgroundColor: '#FFFFFF' 
+  },
   subjectChipActive: { borderColor: '#3B82F6', backgroundColor: '#EFF6FF' },
   subjectChipText: { fontSize: 14, color: '#4B5563', fontWeight: '500' },
   subjectChipTextActive: { color: '#3B82F6', fontWeight: '600' },
+  
+  // NEW STYLES FOR THE CLOSE ACCENT INDICATOR
+  closeIconWrapper: {
+    marginLeft: 8,              
+    backgroundColor: '#3B82F6', 
+    width: 16,
+    height: 16,
+    borderRadius: 8,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  closeIconText: {
+    color: '#FFFFFF',
+    fontSize: 12,
+    fontWeight: 'bold',
+    lineHeight: 14,            
+    textAlign: 'center',
+  },
+
   checkboxContainerRow: { flexDirection: 'row', alignItems: 'center', gap: 10, marginTop: 8, marginBottom: 16 },
   checkboxBox: { width: 20, height: 20, borderWidth: 1.5, borderColor: '#9CA3AF', borderRadius: 4, justifyContent: 'center', alignItems: 'center', backgroundColor: '#FFFFFF' },
   checkboxBoxActive: { borderColor: '#3B82F6', backgroundColor: '#3B82F6' },

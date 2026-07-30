@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { StyleSheet, Text, View, TextInput, TouchableOpacity, SafeAreaView, ScrollView, Image, Dimensions, Alert } from 'react-native';
+import { StyleSheet, Text, View, TextInput, TouchableOpacity, SafeAreaView, ScrollView, Image, Dimensions, Alert, StatusBar } from 'react-native';
 import { router, useLocalSearchParams } from 'expo-router';
 
 const { width } = Dimensions.get('window');
@@ -82,6 +82,7 @@ export default function VerifyEmailScreen() {
 
   return (
     <SafeAreaView style={styles.mainContainer}>
+      <StatusBar barStyle="dark-content" backgroundColor="#FFF" />
       <ScrollView contentContainerStyle={styles.scrollContainer} showsVerticalScrollIndicator={false}>
         {/* LOGO + HERO GRAPHIC ILLUSTRATION FRAME LAYER */}
         <View style={styles.illustrationFrame}>
