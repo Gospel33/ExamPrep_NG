@@ -9,7 +9,8 @@ const logoIllustration = require("../../assets/images/examPrep_logo.png");
 const AVAILABLE_SUBJECTS = [
   'English', 'Biology', 'Physics', 'Chemistry', 'Literature', 
   'Commerce', 'Government', 'CRS', 'IRS', 'Computer Studies', 
-  'Business Studies', 'History', 'Geography', 'Economics'
+  'Business Studies', 'History', 'Geography', 'Economics', 'Mathematics', 
+  'Further Mathematics', 'Agricultural Science', 'Civic Education', 'French',
 ];
 
 export default function SignUp2Screen() {
@@ -48,7 +49,7 @@ export default function SignUp2Screen() {
     });
     console.log("-------------------------------------------------");
 
-    router.replace('/(app)/home');
+    router.replace('/(tabs)/home');
   };
 
   return (

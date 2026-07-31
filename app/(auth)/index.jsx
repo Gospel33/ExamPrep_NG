@@ -55,7 +55,7 @@ export default function SignInScreen() {
             </TouchableOpacity>
           </View>
 
-          <TouchableOpacity style={styles.primaryActionButton} onPress={() => router.replace('/(app)/home')}>
+          <TouchableOpacity style={styles.primaryActionButton} onPress={() => router.replace('/(tabs)/home')}>
             <Text style={styles.primaryActionBtnText}>Login</Text>
           </TouchableOpacity>
 
