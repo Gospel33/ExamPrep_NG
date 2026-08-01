@@ -1,149 +1,174 @@
-import { View, Text, StyleSheet, Pressable, TextInput } from "react-native";
+import { View, Text, StyleSheet, TextInput } from "react-native";
 
-import Ionicons from "@expo/vector-icons/Ionicons";
-import Fontisto from "@expo/vector-icons/Fontisto";
-
+import EvilIcons from "@expo/vector-icons/EvilIcons";
+import Entypo from "@expo/vector-icons/Entypo";
+import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
+import OutlineButton from "../../components/OutlineButton";
 import { router } from "expo-router";
-import SelectedButton from "../../components/SelectedButton";
-import Subject from "../../components/Subject";
-import Button from "../../components/Button";
 
 export default function PracticeScreen() {
   return (
     <View style={styles.container}>
-      <View style={styles.header}>
+      <Text style={styles.welcome}>Welcome Back Joe!</Text>
+      <View style={styles.search}>
         <View>
-          <Pressable
-            onPress={() => {
-              router.back();
-            }}
-          >
-            <Ionicons
-              name="chevron-back-outline"
-              size={16}
-              color="#333333"
-              style={styles.icon}
-            />
-          </Pressable>
+          <TextInput placeholder="Search by keyword or question" />
         </View>
-        <View>
-          <Text
+        <EvilIcons name="search" size={24} color="black" />
+      </View>
+      <View style={styles.content}>
+        <Text style={styles.contentTitle}>Self-Paced Practice</Text>
+        <View style={styles.contentBox}>
+          <View style={styles.contentItem}>
+            <View
+              style={{ flexDirection: "row", alignItems: "center", gap: 8 }}
+            >
+              <MaterialCommunityIcons
+                name="timer-sand-empty"
+                size={24}
+                color="#fff"
+              />
+              <Text
+                style={{
+                  color: "#FFFFFC",
+                  fontFamily: "Poppins",
+                  fontWeight: 600,
+                  fontSize: 16,
+                }}
+              >
+                Start Custom Practice
+              </Text>
+            </View>
+            <View>
+              <Entypo name="chevron-small-right" size={24} color="#fff" />
+            </View>
+          </View>
+
+          <View style={styles.contentDescription}>
+            <Text style={styles.contentDescriptionText}>
+              Customize your practice by choosing your subjects, topics,
+              difficulty, and question count.
+            </Text>
+          </View>
+        </View>
+
+        <View style={styles.contentBottom}>
+          <Text style={styles.contentBottomText}>Recommended Practice</Text>
+          <View
             style={{
-              fontSize: 20,
-              fontFamily: "Poppins",
-              color: "#333333",
-              fontWeight: 600,
+              marginHorizontal: 22,
+              marginTop: 12,
+              flexDirection: "column",
+              gap: 12,
             }}
           >
-            Select Subjects
-          </Text>
-        </View>
-        <View>
-          <Ionicons name="information-circle" size={20} color="#000000" />
-        </View>
-      </View>
-      <View style={styles.searchBar}>
-        <View>
-          <Fontisto name="search" size={18} color="black" />
-        </View>
-        <View>
-          <TextInput style={styles.searchField} placeholder="Search subjects" />
-        </View>
-      </View>
-      <View style={styles.instruction}>
-        <Text style={styles.instructionText}>Selected (3)</Text>
-        <Text style={styles.instructionText}>Clear all (3)</Text>
-      </View>
+            <Text style={styles.contentBottomTitle}>
+              Pure Organic Chemistry
+            </Text>
+            <Text style={styles.contentBottomDescription}>
+              Sharpen your understanding of carbon compounds, reaction
+              mechanisms, and functional groups with carefully selected Organic
+              Chemistry questions tailored to your current learning needs... {`\n`}
+              10mins . Chemistry
+            </Text>
 
-      <View style={styles.selection}>
-        <SelectedButton title={"Mathematics"} />
-        <SelectedButton title={"English Language"} />
-        <SelectedButton title={"Chemistry"} />
-      </View>
+            <OutlineButton title={"Start"} onPress={() =>{
+              router.push("./practice-setup-1")
+            }}/>
 
-      <View style={styles.subjects}>
-        <Subject name={"Mathematics"} checked={true} />
-        <Subject name={"English Language"} checked={true} />
-        <Subject name={"Chemistry"} checked={true} />
-        <Subject name={"Physics"} checked={false} />
-        <Subject name={"Biology"} checked={false} />
-        <Subject name={"Economics"} checked={false} />
-      </View>
-
-      <View style={styles.continueBtn}>
-        <Button title={"Continue"} />
-
-        <Text
-          style={{
-            color: "#666666",
-            alignSelf: "center",
-            fontSize: 12,
-            fontFamily: "Poppins",
-            fontWeight: 400,
-            marginTop: 8
-          }}
-        >
-          Select at least one subject to continue
-        </Text>
+            <Text style={styles.contentBottomTitle}>
+              Pure Organic Chemistry
+            </Text>
+            <Text style={styles.contentBottomDescription}>
+              Sharpen your understanding of carbon compounds, reaction
+              mechanisms, and functional groups with carefully selected Organic
+              Chemistry questions tailored to your current learning needs.
+            </Text>
+          </View>
+        </View>
       </View>
     </View>
   );
 }
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#FFFFFC",
-  },
-  text: { fontSize: 16, color: "#6B7280" },
-  header: {
-    top: 56,
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
     marginHorizontal: 18,
   },
 
-  searchBar: {
-    top: 84,
-    marginHorizontal: 18,
+  welcome: {
+    top: 76,
+    fontFamily: "Poppins",
+    fontWeight: 500,
+    fontSize: 16,
+    color: "#020712",
+  },
+
+  search: {
+    top: 100,
     flexDirection: "row",
     alignItems: "center",
+    justifyContent: "space-between",
     borderWidth: 1,
-    borderColor: "#333333",
+    borderColor: "#FAFAFA",
     borderRadius: 8,
-    paddingHorizontal: 10,
-    paddingVertical: 6,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
   },
-  searchField: {
-    paddingHorizontal: 10,
-    color: "#333333",
+
+  content: {
+    top: 120,
   },
-  instruction: {
-    top: 102,
+
+  contentTitle: {
+    fontFamily: "Poppins",
+    fontWeight: 600,
+    fontSize: 16,
+    color: "#515B6E",
+  },
+
+  contentBox: {
+    backgroundColor: "#2F6FED",
+    paddingHorizontal: 24,
+    paddingVertical: 16,
+    borderRadius: 8,
+    marginTop: 12,
+    height: 120,
+  },
+
+  contentItem: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    marginHorizontal: 18,
   },
-  instructionText: {
-    color: "#666666",
+
+  contentDescription: {
+    marginTop: 8,
+  },
+
+  contentDescriptionText: {
+    color: "#DADCE0",
     fontFamily: "Poppins",
     fontWeight: 400,
-    fontSize: 14,
-  },
-  selection: {
-    top: 120,
-    flexDirection: "row",
-    flexWrap: "wrap",
-    gap: 4,
-    marginHorizontal: 18,
-  },
-  subjects: {
-    top: 134,
+    fontSize: 12,
   },
 
-  continueBtn: {
-    top: 194,
-    marginHorizontal: 18,
+  contentBottom: {
+    marginTop: 24,
+  },
+
+  contentBottomText: {
+    fontFamily: "Poppins",
+    fontWeight: 600,
+    fontSize: 16,
+    color: "#515B6E",
+  },
+
+  contentBottomDescription: {
+    fontFamily: "Poppins",
+    fontWeight: 400,
+    fontSize: 12,
+    color: "#515B6E",
   },
 });
