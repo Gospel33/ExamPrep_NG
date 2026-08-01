@@ -7,11 +7,10 @@ import {
   TouchableOpacity, 
   Image, 
   Dimensions, 
-  SafeAreaView, 
   StatusBar 
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
-// 1. IMPORT PURE EXPO VECTOR ICONS MATCHING THE DESIGN SHAPES
 import Octicons from '@expo/vector-icons/Octicons';
 import Feather from '@expo/vector-icons/Feather';
 
@@ -22,10 +21,10 @@ const emptyDashboardIllustration = require("../../assets/images/auth_illustratio
 
 // Mock Syllabus Data corresponding to the selected subjects configuration array
 const MOCK_SYLLABUS = [
-  { name: 'English', progress: 0.92, color: '#15803D' },     // Green bar meter
-  { name: 'Biology', progress: 0.48, color: '#EAB308' },     // Yellow bar meter
-  { name: 'Chemistry', progress: 0.30, color: '#DC2626' },   // Red bar meter
-  { name: 'Mathematics', progress: 0.87, color: '#2563EB' }, // Blue bar meter
+  { name: 'English', progress: 0.92, color: '#15803D' },     
+  { name: 'Biology', progress: 0.48, color: '#EAB308' },     
+  { name: 'Chemistry', progress: 0.30, color: '#DC2626' },   
+  { name: 'Mathematics', progress: 0.87, color: '#2563EB' },
 ];
 
 const MOCK_HISTORY = [
@@ -39,7 +38,7 @@ export default function StudentDashboardScreen() {
   // Change to 'false' to immediately preview the active student analytics view layout!
   const [isNewUser, setIsNewUser] = useState(false); 
 
-  // ==================== VIEW A: ACTIVE PERFORMANCE STUDENT SUMMARY ====================
+  //  VIEW A: ACTIVE PERFORMANCE STUDENT SUMMARY 
   const RenderActiveDashboard = () => (
     <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.scrollContentContainer}>
       
@@ -98,7 +97,7 @@ export default function StudentDashboardScreen() {
     </ScrollView>
   );
 
-  // ==================== VIEW B: NEW USER EMPTY BLANK STATE ====================
+  //  VIEW B: NEW USER EMPTY BLANK STATE 
   const RenderNewUserBlankState = () => (
     <View style={styles.emptyStateContainerBoxCenteringLayer}>
       <Image 

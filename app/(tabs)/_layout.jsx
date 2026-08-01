@@ -21,8 +21,8 @@ export default function TabsLayout() {
         headerShown: false,
         tabBarShowLabel: true, 
         tabBarStyle: styles.tabBar,
-        tabBarActiveTintColor: '#3B82F6',   // Label color when selected
-        tabBarInactiveTintColor: '#A6A6A6', // Label color when inactive
+        tabBarActiveTintColor: '#3B82F6',   
+        tabBarInactiveTintColor: '#A6A6A6', 
         tabBarLabelStyle: styles.tabLabel,
       }}
     >
@@ -120,10 +120,9 @@ const styles = StyleSheet.create({
   iconContainer: {
     alignItems: 'center',
     justifyContent: 'center',
-    height: 24, // Explicit constraints keep custom images from blowing out
+    height: 24,
     width: 24,
   },
-  // 3. TARGET DESIGN SCALE: Ensures your custom graphics render crisp and sharp
   tabImageStyle: {
     width: '100%',
     height: '100%',
