@@ -3,7 +3,7 @@ import { View, Text, StyleSheet, TextInput } from "react-native";
 import EvilIcons from "@expo/vector-icons/EvilIcons";
 import Entypo from "@expo/vector-icons/Entypo";
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
-import OutlineButton from "../../components/OutlineButton";
+import OutlineButton from "../../../components/OutlineButton";
 import { router } from "expo-router";
 
 export default function PracticeScreen() {
@@ -73,7 +73,7 @@ export default function PracticeScreen() {
             </Text>
 
             <OutlineButton title={"Start"} onPress={() =>{
-              router.push("./practice-setup-1")
+              router.push("/practice/setup")
             }}/>
 
             <Text style={styles.contentBottomTitle}>

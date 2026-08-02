@@ -1,15 +1,15 @@
 import { StyleSheet, Text, View } from "react-native";
-import BackButton from "../components/BackButton";
-import SelectedButton from "../components/SelectedButton";
+import BackButton from "../../../components/BackButton";
+import SelectedButton from "../../../components/SelectedButton";
 
 import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 
-import SelectField from "../components/SelectField";
+import SelectField from "../../../components/SelectField";
 import { Picker } from "@react-native-picker/picker";
-import TimerButton from "../components/TimerButton";
-import Button from "../components/Button";
+import TimerButton from "../../../components/TimerButton";
+import Button from "../../../components/Button";
 
 export default function PracticeSetup1() {
   return (
