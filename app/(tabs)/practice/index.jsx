@@ -73,7 +73,7 @@ export default function PracticeScreen() {
             </Text>
 
             <OutlineButton title={"Start"} onPress={() =>{
-              router.push("/practice/setup")
+              router.push("/practice/setup-1")
             }}/>
 
             <Text style={styles.contentBottomTitle}>

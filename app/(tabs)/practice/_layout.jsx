@@ -5,7 +5,10 @@ export default function PracticeLayout() {
     <Stack screenOptions={{ headerShown: false }}>
      
       <Stack.Screen name="index" />
-      <Stack.Screen name="setup" />
+      <Stack.Screen name="setup-1" />
+      <Stack.Screen name="setup-2" />
+      <Stack.Screen name="startPage" />
+      <Stack.Screen name="endPage" />
     </Stack>
   );
 }

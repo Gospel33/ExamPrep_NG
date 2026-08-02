@@ -10,6 +10,7 @@ import SelectField from "../../../components/SelectField";
 import { Picker } from "@react-native-picker/picker";
 import TimerButton from "../../../components/TimerButton";
 import Button from "../../../components/Button";
+import { router } from "expo-router";
 
 export default function PracticeSetup1() {
   return (
@@ -68,7 +69,7 @@ export default function PracticeSetup1() {
             flexWrap: "wrap",
             flexDirection: "row",
             gap: 4,
-            alignSelf: "center"
+            alignSelf: "center",
           }}
         >
           <TimerButton
@@ -93,7 +94,14 @@ export default function PracticeSetup1() {
       </View>
 
       <View style={{ top: 144 }}>
-            <Button title={"Continue to practice"} backgroundColor="#2F6FED" textColor="#FFFFFC"/>
+        <Button
+          title={"Continue to practice"}
+          backgroundColor="#2F6FED"
+          textColor="#FFFFFC"
+          onPress={() => {
+            router.push("/practice/setup-2");
+          }}
+        />
       </View>
     </View>
   );
