@@ -8,7 +8,7 @@ import SelectedButton from "../../components/SelectedButton";
 import Subject from "../../components/Subject";
 import Button from "../../components/Button";
 
-export default function PracticeScreen() {
+function PracticeScreen() {
   return (
     <View style={styles.container}>
       <View style={styles.header}>
