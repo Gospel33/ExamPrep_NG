@@ -46,9 +46,9 @@ export default function TabsLayout() {
 
       {/* 2. PRACTICE TAB */}
       <Tabs.Screen
-        name="practice"
+        name="quiz"
         options={{
-          title: 'Practice',
+          title: 'Quiz',
           tabBarIcon: ({ focused }) => (
             <View style={styles.iconContainer}>
               <Image 

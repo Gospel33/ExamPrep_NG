@@ -7,17 +7,19 @@ import {
   TouchableOpacity, 
   Image, 
   Dimensions, 
-  StatusBar 
+  StatusBar,
+  ActivityIndicator,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
 import Octicons from '@expo/vector-icons/Octicons';
 import Feather from '@expo/vector-icons/Feather';
+import { authService, practiceService } from '../../lib/api';
 
 const { width } = Dimensions.get('window');
 
 // Placeholder local empty-state asset graphic 
-const emptyDashboardIllustration = require("../../assets/images/auth_illustration.png");
+const emptyDashboardIllustration = require("../../assets/images/onboard-2.png");
 
 // Mock Syllabus Data corresponding to the selected subjects configuration array
 const MOCK_SYLLABUS = [
@@ -34,9 +36,67 @@ const MOCK_HISTORY = [
 ];
 
 export default function StudentDashboardScreen() {
-  // 2. DYNAMIC LOOKUP SWITCH STATE FLAG
-  // Change to 'false' to immediately preview the active student analytics view layout!
-  const [isNewUser, setIsNewUser] = useState(false); 
+  const [practiceHistory, setPracticeHistory] = useState([]);
+  const [isNewUser, setIsNewUser] = useState(true);
+  const [loadingHistory, setLoadingHistory] = useState(true);
+  const [historyError, setHistoryError] = useState(null);
+  const [firstName, setFirstName] = useState('');
+
+  const extractFirstName = (profile) => {
+    const name = profile?.firstName ?? profile?.fullName ?? profile?.name;
+    return name ? String(name).split(' ')[0] : '';
+  };
+
+  useEffect(() => {
+    const loadPracticeHistory = async () => {
+      setLoadingHistory(true);
+      setHistoryError(null);
+      try {
+        const response = await practiceService.getHistory();
+        const rawPayload = response?.data ?? response ?? [];
+        const payload = Array.isArray(rawPayload) ? rawPayload : rawPayload?.data ?? rawPayload;
+        const normalizedHistory = Array.isArray(payload)
+          ? payload
+          : payload?.history ?? payload?.items ?? [];
+
+        const historyItems = normalizedHistory.map((item, index) => ({
+          id: item.id ?? item.sessionId ?? String(index),
+          title: item.title ?? item.type ?? 'Practice Session',
+          specs: item.specs ?? (item.subjects ? item.subjects.join(' • ') : item.subject ?? 'Practice details'),
+          date: item.date ?? item.createdAt ?? '',
+          score: item.score ?? (item.percentage ? `${item.percentage}` : ''),
+        }));
+
+        setPracticeHistory(historyItems);
+        setIsNewUser(historyItems.length === 0);
+      } catch (error) {
+        console.log('Failed to load practice history:', error?.response?.data || error?.message || error);
+        setPracticeHistory([]);
+        setIsNewUser(true);
+        setHistoryError('Unable to load your dashboard. Please try again later.');
+      } finally {
+        setLoadingHistory(false);
+      }
+    };
+
+    loadPracticeHistory();
+  }, []);
+
+  useEffect(() => {
+    const loadProfile = async () => {
+      try {
+        const profile = await authService.getProfile();
+        const name = extractFirstName(profile);
+        if (name) {
+          setFirstName(name);
+        }
+      } catch (error) {
+        console.log('Failed to load profile for dashboard greeting:', error?.response?.data || error?.message || error);
+      }
+    };
+
+    loadProfile();
+  }, []);
 
   //  VIEW A: ACTIVE PERFORMANCE STUDENT SUMMARY 
   const RenderActiveDashboard = () => (
@@ -82,15 +142,15 @@ export default function StudentDashboardScreen() {
       {/* PRACTICE HISTORY LIST CANVAS */}
       <Text style={styles.globalSectionHeadingTitleText}>Practice History</Text>
       
-      {MOCK_HISTORY.map((item) => (
-        <View key={item.id} style={styles.historyListCardItemRow}>
+      {practiceHistory.map((item) => (
+        <View key={item.id || item.sessionId || item.title} style={styles.historyListCardItemRow}>
           <View style={styles.historyLeftMetaBox}>
-            <Text style={styles.historyCardTitleText}>{item.title}</Text>
-            <Text style={styles.historyCardSpecsSubtext}>{item.specs}</Text>
+            <Text style={styles.historyCardTitleText}>{item.title || 'Practice Session'}</Text>
+            <Text style={styles.historyCardSpecsSubtext}>{item.specs || item.subjects?.join(' • ') || 'Practice details'}</Text>
           </View>
           <View style={styles.historyRightScoreBox}>
-            <Text style={styles.historyCardDateText}>{item.date}</Text>
-            <Text style={styles.historyCardScoreValueText}>{item.score}</Text>
+            <Text style={styles.historyCardDateText}>{item.date || item.createdAt || ''}</Text>
+            <Text style={styles.historyCardScoreValueText}>{item.score || item.percentage || ''}</Text>
           </View>
         </View>
       ))}
@@ -113,7 +173,7 @@ export default function StudentDashboardScreen() {
       <TouchableOpacity 
         style={styles.primaryLaunchPracticeButton} 
         activeOpacity={0.8}
-        onPress={() => router.push('/(tabs)/practice')} // Redirects to practice tab screen viewport
+        onPress={() => router.push('/(tabs)/quiz')} // Redirects to practice tab screen viewport
       >
         <Text style={styles.primaryLaunchPracticeButtonText}>Start Practice</Text>
       </TouchableOpacity>
@@ -126,12 +186,25 @@ export default function StudentDashboardScreen() {
       
       {/* PERMANENT TOP HERO WELCOME BANNER LAYER */}
       <View style={styles.topStickyHeaderBarContainer}>
-        <Text style={styles.welcomeSalutationText}>Welcome Back Joe!</Text>
+        <Text style={styles.welcomeSalutationText}>{`Welcome Back${firstName ? ` ${firstName}` : ''}!`}</Text>
         <Text style={styles.mainScreenTitleTextHeadingText}>Performance Summary</Text>
       </View>
 
-      {/* CORE LAYER TOGGLE LAYOUT SWITCH ENGINE */}
-      {isNewUser ? RenderNewUserBlankState() : RenderActiveDashboard()}
+      {loadingHistory ? (
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color="#3B82F6" />
+          <Text style={styles.loadingText}>Loading your dashboard...</Text>
+        </View>
+      ) : historyError ? (
+        <View style={styles.errorStateContainer}>
+          <Text style={styles.errorText}>{historyError}</Text>
+          <TouchableOpacity style={styles.primaryLaunchPracticeButton} activeOpacity={0.8} onPress={() => router.push('/(tabs)/quiz')}>
+            <Text style={styles.primaryLaunchPracticeButtonText}>Start Practice</Text>
+          </TouchableOpacity>
+        </View>
+      ) : (
+        isNewUser ? RenderNewUserBlankState() : RenderActiveDashboard()
+      )}
 
     </SafeAreaView>
   );
@@ -293,8 +366,8 @@ const styles = StyleSheet.create({
     paddingBottom: 64,
   },
   emptyStateIllustrationAsset: {
-    width: width * 0.65,
-    height: 200,
+    width: width * 0.75,
+    height: 400,
     marginBottom: 24,
   },
   emptyStateHeadlineTitleText: {
@@ -311,6 +384,31 @@ const styles = StyleSheet.create({
     lineHeight: 20,
     marginTop: 12,
     paddingHorizontal: 12,
+  },
+  loadingContainer: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: 24,
+  },
+  loadingText: {
+    marginTop: 16,
+    fontSize: 15,
+    color: '#374151',
+    textAlign: 'center',
+  },
+  errorStateContainer: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: 24,
+  },
+  errorText: {
+    fontSize: 15,
+    color: '#B91C1C',
+    textAlign: 'center',
+    marginBottom: 20,
+    lineHeight: 22,
   },
   primaryLaunchPracticeButton: {
     backgroundColor: '#3B82F6',

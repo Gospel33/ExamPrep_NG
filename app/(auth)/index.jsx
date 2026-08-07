@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
-import { StyleSheet, Text, View, TextInput, TouchableOpacity, SafeAreaView, ScrollView, Image, Dimensions, StatusBar } from 'react-native';
+import { StyleSheet, Text, View, TextInput, TouchableOpacity, SafeAreaView, ScrollView, Image, Dimensions, StatusBar, Alert, ActivityIndicator } from 'react-native';
 import { router, Link } from 'expo-router';
 import Feather from '@expo/vector-icons/Feather';
+import { authService } from '../../lib/api';
 
 const { width } = Dimensions.get('window');
 const authIllustration = require("../../assets/images/auth_illustration.png");
@@ -11,6 +12,32 @@ export default function SignInScreen() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
+  const [isLoggingIn, setIsLoggingIn] = useState(false);
+
+  const handleLogin = async () => {
+    if (!email || !password) {
+      return Alert.alert('Fields Required', 'Please enter both your email and password.');
+    }
+
+    setIsLoggingIn(true);
+    try {
+      // login() stores the tokens on success (see lib/api.js). Only on a
+      // genuinely successful response do we navigate into the app - any
+      // failure (wrong password, unknown email, unverified account, etc.)
+      // throws and is caught below, so the user stays on this screen.
+      await authService.login({ email, password });
+      router.replace('/(tabs)/home');
+    } catch (error) {
+      const apiErrors = error?.response?.data?.errors;
+      const message =
+        apiErrors?.[0]?.message ||
+        error?.response?.data?.message ||
+        'Incorrect email or password. Please try again.';
+      Alert.alert('Login Failed', message);
+    } finally {
+      setIsLoggingIn(false);
+    }
+  };
 
   return (
     <SafeAreaView style={styles.mainContainer}>
@@ -37,6 +64,7 @@ export default function SignInScreen() {
             onChangeText={setEmail}
             autoCapitalize="none"
             keyboardType="email-address"
+            editable={!isLoggingIn}
           />
 
           <Text style={styles.fieldLabelText}>Enter Password</Text>
@@ -49,14 +77,23 @@ export default function SignInScreen() {
               value={password}
               onChangeText={setPassword}
               autoCapitalize="none"
+              editable={!isLoggingIn}
             />
             <TouchableOpacity onPress={() => setShowPassword(!showPassword)} style={styles.eyeBtn}>
               <Feather name={showPassword ? "eye" : "eye-off"} size={20} color="#6B7280" />
             </TouchableOpacity>
           </View>
 
-          <TouchableOpacity style={styles.primaryActionButton} onPress={() => router.replace('/(tabs)/home')}>
-            <Text style={styles.primaryActionBtnText}>Login</Text>
+          <TouchableOpacity
+            style={[styles.primaryActionButton, isLoggingIn && styles.primaryActionButtonDisabled]}
+            onPress={handleLogin}
+            disabled={isLoggingIn}
+          >
+            {isLoggingIn ? (
+              <ActivityIndicator color="#FFFFFF" />
+            ) : (
+              <Text style={styles.primaryActionBtnText}>Login</Text>
+            )}
           </TouchableOpacity>
 
           <TouchableOpacity onPress={() => router.push('/forgot')} style={styles.secondaryLinkRow}>
@@ -91,6 +128,7 @@ const styles = StyleSheet.create({
   innerFieldTextInput: { flex: 1, height: '100%', paddingHorizontal: 16, color: '#111827', fontSize: 15 },
   eyeBtn: { paddingHorizontal: 16, height: '100%', justifyContent: 'center' },
   primaryActionButton: { backgroundColor: '#3B82F6', width: '100%', height: 50, borderRadius: 8, justifyContent: 'center', alignItems: 'center', marginTop: 28 },
+  primaryActionButtonDisabled: { backgroundColor: '#93C5FD' },
   primaryActionBtnText: { color: '#FFFFFF', fontSize: 16, fontWeight: '600' },
   secondaryLinkRow: { alignItems: 'center', marginTop: 16 },
   forgotPasswordText: { color: '#3B82F6', fontSize: 14, fontWeight: '500' },

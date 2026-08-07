@@ -1,22 +1,29 @@
 import React, { useState } from 'react';
-import { StyleSheet, Text, View, TouchableOpacity, SafeAreaView, ScrollView, Image, Dimensions, Alert, StatusBar } from 'react-native';
+import { StyleSheet, Text, View, TouchableOpacity, SafeAreaView, ScrollView, Image, Dimensions, Alert, StatusBar, ActivityIndicator } from 'react-native';
 import { router, useLocalSearchParams } from 'expo-router';
+import { authService } from '../../lib/api';
 
 const { width } = Dimensions.get('window');
 const authIllustration = require("../../assets/images/auth_illustration.png");
 const logoIllustration = require("../../assets/images/examPrep_logo.png");
 
 const AVAILABLE_SUBJECTS = [
-  'English', 'Biology', 'Physics', 'Chemistry', 'Literature', 
-  'Commerce', 'Government', 'CRS', 'IRS', 'Computer Studies', 
-  'Business Studies', 'History', 'Geography', 'Economics', 'Mathematics', 
+  'English', 'Biology', 'Physics', 'Chemistry', 'Literature',
+  'Commerce', 'Government', 'CRS', 'IRS', 'Computer Studies',
+  'Business Studies', 'History', 'Geography', 'Economics', 'Mathematics',
   'Further Mathematics', 'Agricultural Science', 'Civic Education', 'French',
 ];
 
+// The backend requires preferredExamType alongside preferredSubjects, but
+// this screen doesn't currently ask the user for it. Defaulting to JAMB for
+// now - swap this out once there's a real exam-type picker in the flow.
+const DEFAULT_EXAM_TYPE = 'JAMB';
+
 export default function SignUp2Screen() {
-  const params = useLocalSearchParams(); 
+  const params = useLocalSearchParams();
   const [selectedSubjects, setSelectedSubjects] = useState([]);
   const [agreedToTerms, setAgreedToTerms] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const toggleSubjectSelection = (subject) => {
     if (selectedSubjects.includes(subject)) {
@@ -30,7 +37,7 @@ export default function SignUp2Screen() {
     }
   };
 
-  const handleRegistrationFinalSubmit = () => {
+  const handleRegistrationFinalSubmit = async () => {
     if (selectedSubjects.length !== 4) {
       return Alert.alert('Incomplete Profile', 'Please select exactly 4 subjects to proceed.');
     }
@@ -38,18 +45,32 @@ export default function SignUp2Screen() {
       return Alert.alert('Terms & Conditions', 'You must agree to the Terms & Conditions to create an account.');
     }
 
-    console.log("--- FINAL SUBMIT: ACCOUNT REGISTRATION READY ---");
-    console.log({
-      action: "register_new_student_account",
-      firstName: params.firstName,
-      lastName: params.lastName,
-      email: params.email,
-      password: params.password,
-      chosenSubjects: selectedSubjects
-    });
-    console.log("-------------------------------------------------");
+    setIsSubmitting(true);
+    try {
+      // Save the chosen exam type and subjects to the authenticated user.
+      const response = await authService.updateSettings({
+        preferredExamType: DEFAULT_EXAM_TYPE,
+        preferredSubjects: selectedSubjects,
+      });
 
-    router.replace('/(tabs)/home');
+      if (!response) {
+        throw new Error('No response received from the server.');
+      }
+
+      Alert.alert('Registration Complete', 'Your subjects have been saved successfully.', [
+        { text: 'Continue', onPress: () => router.replace('/(tabs)/home') },
+      ]);
+    } catch (error) {
+      console.log('updateSettings error:', JSON.stringify(error?.response?.data || error?.message, null, 2));
+      const apiErrors = error?.response?.data?.errors;
+      const message =
+        apiErrors?.[0]?.message ||
+        error?.response?.data?.message ||
+        'Could not save your subject preferences. Please try again.';
+      Alert.alert('Save Failed', message);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -74,11 +95,12 @@ export default function SignUp2Screen() {
                   onPress={() => toggleSubjectSelection(subject)}
                   style={[styles.subjectChip, isSelected && styles.subjectChipActive]}
                   activeOpacity={0.7}
+                  disabled={isSubmitting}
                 >
                   <Text style={[styles.subjectChipText, isSelected && styles.subjectChipTextActive]}>
                     {subject}
                   </Text>
-                  
+
                   {/* Cancel Icon: Renders only when the subject is selected */}
                   {isSelected && (
                     <View style={styles.closeIconWrapper}>
@@ -90,7 +112,7 @@ export default function SignUp2Screen() {
             })}
           </View>
 
-          <TouchableOpacity style={styles.checkboxContainerRow} activeOpacity={0.8} onPress={() => setAgreedToTerms(!agreedToTerms)}>
+          <TouchableOpacity style={styles.checkboxContainerRow} activeOpacity={0.8} onPress={() => setAgreedToTerms(!agreedToTerms)} disabled={isSubmitting}>
             <View style={[styles.checkboxBox, agreedToTerms && styles.checkboxBoxActive]}>
               {agreedToTerms && <Text style={styles.checkmarkIcon}>✓</Text>}
             </View>
@@ -99,8 +121,16 @@ export default function SignUp2Screen() {
             </Text>
           </TouchableOpacity>
 
-          <TouchableOpacity style={styles.primaryActionButton} onPress={handleRegistrationFinalSubmit}>
-            <Text style={styles.primaryActionBtnText}>Complete Registration</Text>
+          <TouchableOpacity
+            style={[styles.primaryActionButton, isSubmitting && styles.primaryActionButtonDisabled]}
+            onPress={handleRegistrationFinalSubmit}
+            disabled={isSubmitting}
+          >
+            {isSubmitting ? (
+              <ActivityIndicator color="#FFFFFF" />
+            ) : (
+              <Text style={styles.primaryActionBtnText}>Complete Registration</Text>
+            )}
           </TouchableOpacity>
         </View>
       </ScrollView>
@@ -118,26 +148,26 @@ const styles = StyleSheet.create({
   screenTitleText: { fontSize: 24, fontWeight: 'bold', color: '#111827' },
   screenSubtitleText: { fontSize: 13, color: '#6B7280', marginTop: 4, marginBottom: 16 },
   subjectsGridWrapper: { flexDirection: 'row', flexWrap: 'wrap', gap: 10, width: '100%', marginBottom: 24 },
-  
+
   // UPDATED STYLES FOR THE CHIPS
-  subjectChip: { 
-    flexDirection: 'row',       
-    alignItems: 'center',       
-    paddingHorizontal: 16, 
-    paddingVertical: 10, 
-    borderRadius: 24, 
-    borderWidth: 1, 
-    borderColor: '#E5E7EB', 
-    backgroundColor: '#FFFFFF' 
+  subjectChip: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    borderRadius: 24,
+    borderWidth: 1,
+    borderColor: '#E5E7EB',
+    backgroundColor: '#FFFFFF'
   },
   subjectChipActive: { borderColor: '#3B82F6', backgroundColor: '#EFF6FF' },
   subjectChipText: { fontSize: 14, color: '#4B5563', fontWeight: '500' },
   subjectChipTextActive: { color: '#3B82F6', fontWeight: '600' },
-  
+
   // NEW STYLES FOR THE CLOSE ACCENT INDICATOR
   closeIconWrapper: {
-    marginLeft: 8,              
-    backgroundColor: '#3B82F6', 
+    marginLeft: 8,
+    backgroundColor: '#3B82F6',
     width: 16,
     height: 16,
     borderRadius: 8,
@@ -148,7 +178,7 @@ const styles = StyleSheet.create({
     color: '#FFFFFF',
     fontSize: 12,
     fontWeight: 'bold',
-    lineHeight: 14,            
+    lineHeight: 14,
     textAlign: 'center',
   },
 
@@ -159,5 +189,6 @@ const styles = StyleSheet.create({
   checkboxLabelText: { fontSize: 13, color: '#4B5563' },
   legalHighlightText: { color: '#3B82F6', fontWeight: '500' },
   primaryActionButton: { backgroundColor: '#3B82F6', width: '100%', height: 50, borderRadius: 8, justifyContent: 'center', alignItems: 'center' },
+  primaryActionButtonDisabled: { backgroundColor: '#93C5FD' },
   primaryActionBtnText: { color: '#FFFFFF', fontSize: 16, fontWeight: '600' }
 });

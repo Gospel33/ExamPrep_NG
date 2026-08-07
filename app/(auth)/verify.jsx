@@ -1,23 +1,24 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { StyleSheet, Text, View, TextInput, TouchableOpacity, SafeAreaView, ScrollView, Image, Dimensions, Alert, StatusBar } from 'react-native';
+import { StyleSheet, Text, View, TextInput, TouchableOpacity, SafeAreaView, ScrollView, Image, Dimensions, Alert, StatusBar, ActivityIndicator } from 'react-native';
 import { router, useLocalSearchParams } from 'expo-router';
+import { authService } from '../../lib/api';
 
 const { width } = Dimensions.get('window');
 const authIllustration = require("../../assets/images/auth_illustration.png");
 const logoIllustration = require("../../assets/images/examPrep_logo.png");
 
 export default function VerifyEmailScreen() {
-  const params = useLocalSearchParams(); 
+  const params = useLocalSearchParams();
   const { mode, firstName, lastName, email, password } = params;
-  const isSignUpMode = mode === 'signup'; 
+  const isSignUpMode = mode === 'signup';
 
   const [otp, setOtp] = useState(['', '', '', '', '']);
   const inputRefs = [useRef(null), useRef(null), useRef(null), useRef(null), useRef(null)];
 
-  // 1. DYNAMIC TIMING CONTROLLER ENGINE HOOK
   const [secondsLeft, setSecondsLeft] = useState(60);
+  const [isVerifying, setIsVerifying] = useState(false);
+  const [isResending, setIsResending] = useState(false);
 
-  // 2. RUNS DYNAMIC INTERVAL CONTINUOUS DECREMENTS FOR THE CLOCK
   useEffect(() => {
     if (secondsLeft === 0) return;
 
@@ -28,7 +29,6 @@ export default function VerifyEmailScreen() {
     return () => clearInterval(intervalId);
   }, [secondsLeft]);
 
-  // 3. CONVERTS RAW INTEGER SECONDS INTO SECURE 00:XX TEXT COMPONENT STRINGS
   const formatTimerString = () => {
     const minutes = Math.floor(secondsLeft / 60);
     const remainderSeconds = secondsLeft % 60;
@@ -37,14 +37,26 @@ export default function VerifyEmailScreen() {
     return `${formattedMinutes}:${formattedSeconds}`;
   };
 
-  // 4. ACTION HOOK: HANDLES CODE DISPATCH EVENTS AND WIND CLOCKS BACK UP
-  const handleResendCodeTrigger = () => {
-    console.log(`Dispatched request: Fresh API verification code re-requested for: ${email}`);
-    Alert.alert('Code Dispatched', `A fresh 5-digit verification code has been successfully sent to ${email || 'your email'}.`);
-    
-    setSecondsLeft(60);
-    setOtp(['', '', '', '', '']); // Wipes input fields box context data to start fresh
-    inputRefs[0].current?.focus(); // Instantly snap device keyboard focus right back to box one
+  const handleResendCodeTrigger = async () => {
+    setIsResending(true);
+    try {
+      if (isSignUpMode) {
+        await authService.resendVerificationOtp(email);
+        Alert.alert('Code Dispatched', `A fresh 5-digit verification code has been sent to ${email || 'your email'}.`);
+      } else {
+        // Password-reset flow does have a real endpoint for this.
+        await authService.forgotPassword(email);
+        Alert.alert('Code Dispatched', `A fresh 5-digit verification code has been sent to ${email || 'your email'}.`);
+      }
+      setSecondsLeft(60);
+      setOtp(['', '', '', '', '']);
+      inputRefs[0].current?.focus();
+    } catch (error) {
+      const message = error?.response?.data?.message || 'Could not resend the code. Please try again.';
+      Alert.alert('Resend Failed', message);
+    } finally {
+      setIsResending(false);
+    }
   };
 
   const handleOtpChange = (text, index) => {
@@ -63,20 +75,50 @@ export default function VerifyEmailScreen() {
     }
   };
 
-  const handleVerificationSubmit = () => {
+  const handleVerificationSubmit = async () => {
     const enteredPin = otp.join('');
     if (enteredPin.length < 5) {
       return Alert.alert('Incomplete Pin', 'Please enter your entire 5-digit verification code.');
     }
 
-    if (isSignUpMode) {
-      console.log("Email Verified! Moving to Subject Picker payload info:", { firstName, lastName, email, password, otpCode: enteredPin });
-      router.push({
-        pathname: '/signup2',
-        params: { firstName, lastName, email, password }
-      });
-    } else {
-      router.push('/reset');
+    setIsVerifying(true);
+    try {
+      if (isSignUpMode) {
+        // Confirms the email using the 5-digit code as the verification token.
+        // The backend looks the user up by email, so it must be sent too.
+        await authService.verifyEmail(email, enteredPin);
+
+        // verify-email doesn't return auth tokens in the docs, so we log in
+        // right after using the credentials carried from the sign-up screen -
+        // this is an assumption, confirm with the backend team that this is
+        // the intended flow (vs. verify-email returning tokens itself).
+        await authService.login({ email, password });
+
+        router.push({
+          pathname: '/signup2',
+          params: { firstName, lastName, email },
+        });
+      } else {
+        // For password reset, verification and the actual reset happen
+        // together on the next screen via /auth/reset-password, so we just
+        // carry the entered code forward as the reset token.
+        router.push({
+          pathname: '/reset',
+          params: { email, token: enteredPin },
+        });
+      }
+    } catch (error) {
+      // TEMP DEBUG - remove once verification is confirmed working
+      console.log('verify-email error:', JSON.stringify(error?.response?.data, null, 2));
+
+      const apiErrors = error?.response?.data?.errors;
+      const message =
+        apiErrors?.[0]?.message ||
+        error?.response?.data?.message ||
+        'That code could not be verified. Please check it and try again.';
+      Alert.alert('Verification Failed', message);
+    } finally {
+      setIsVerifying(false);
     }
   };
 
@@ -95,8 +137,8 @@ export default function VerifyEmailScreen() {
             {isSignUpMode ? 'Verify your email' : 'Verify Recovery Code'}
           </Text>
           <Text style={styles.screenSubtitleText}>
-            {isSignUpMode 
-              ? 'An activation pin code was sent to your email address.' 
+            {isSignUpMode
+              ? 'An activation pin code was sent to your email address.'
               : 'Enter the 5-digit verification token to reset your password.'
             }
           </Text>
@@ -114,17 +156,26 @@ export default function VerifyEmailScreen() {
                 onChangeText={(text) => handleOtpChange(text, index)}
                 onKeyPress={(e) => handleKeyPress(e, index)}
                 textAlign="center"
+                editable={!isVerifying}
               />
             ))}
           </View>
 
-          <TouchableOpacity style={styles.primaryActionButton} onPress={handleVerificationSubmit}>
-            <Text style={styles.primaryActionBtnText}>
-              {isSignUpMode ? 'Verify Account' : 'Verify & Continue'}
-            </Text>
+          <TouchableOpacity
+            style={[styles.primaryActionButton, isVerifying && styles.primaryActionButtonDisabled]}
+            onPress={handleVerificationSubmit}
+            disabled={isVerifying}
+          >
+            {isVerifying ? (
+              <ActivityIndicator color="#FFFFFF" />
+            ) : (
+              <Text style={styles.primaryActionBtnText}>
+                {isSignUpMode ? 'Verify Account' : 'Verify & Continue'}
+              </Text>
+            )}
           </TouchableOpacity>
 
-          {/* 5. DYNAMICALLY RENDERED INTERACTIVE FOOTER ROW */}
+          {/* DYNAMICALLY RENDERED INTERACTIVE FOOTER ROW */}
           {secondsLeft > 0 ? (
             <Text style={styles.resendClockText}>
               {`Didn't receive code? `}
@@ -133,8 +184,12 @@ export default function VerifyEmailScreen() {
           ) : (
             <View style={styles.resendActionWrapperRow}>
               <Text style={styles.resendClockText}>{`Didn't receive code? `}</Text>
-              <TouchableOpacity onPress={handleResendCodeTrigger} activeOpacity={0.7}>
-                <Text style={styles.resendActiveActionText}>Resend Code</Text>
+              <TouchableOpacity onPress={handleResendCodeTrigger} activeOpacity={0.7} disabled={isResending}>
+                {isResending ? (
+                  <ActivityIndicator size="small" color="#3B82F6" />
+                ) : (
+                  <Text style={styles.resendActiveActionText}>Resend Code</Text>
+                )}
               </TouchableOpacity>
             </View>
           )}
@@ -157,11 +212,12 @@ const styles = StyleSheet.create({
   otpInputsWrapperRow: { flexDirection: 'row', justifyContent: 'space-between', width: '100%', paddingHorizontal: 8, marginBottom: 32 },
   otpPinBox: { width: 52, height: 56, borderWidth: 1.5, borderColor: '#D1D5DB', borderRadius: 8, fontSize: 22, fontWeight: 'bold', backgroundColor: '#F9FAFB', color: '#111827' },
   primaryActionButton: { backgroundColor: '#3B82F6', width: '100%', height: 50, borderRadius: 8, justifyContent: 'center', alignItems: 'center' },
+  primaryActionButtonDisabled: { backgroundColor: '#93C5FD' },
   primaryActionBtnText: { color: '#FFFFFF', fontSize: 16, fontWeight: '600' },
-  
+
   resendClockText: { marginTop: 24, fontSize: 13, color: '#6B7280' },
   timeHighlight: { color: '#3B82F6', fontWeight: '500' },
-  
+
   resendActionWrapperRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center' },
   resendActiveActionText: { marginTop: 24, fontSize: 13, color: '#3B82F6', fontWeight: 'bold', textDecorationLine: 'underline' }
 });
